@@ -31,10 +31,17 @@ FetchContent_MakeAvailable(raylib)
 add_executable(game main.c)
 target_link_libraries(game PRIVATE box2d raylib)
 
+add_custom_command(TARGET game POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		${CMAKE_SOURCE_DIR}/ground.png
+		${CMAKE_SOURCE_DIR}/box.png
+		$<TARGET_FILE_DIR:game>
+)
+
 if (MSVC)
 	set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT game)
 	set_property(TARGET game PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}")
-endif()	
+endif()
 
 if (EMSCRIPTEN)
 	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")    
