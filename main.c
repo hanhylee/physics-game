@@ -54,8 +54,8 @@ int main(void)
 	worldDef.gravity.y = 9.8f * lengthUnitsPerMeter;
 	b2WorldId worldId = b2CreateWorld(&worldDef);
 
-	Texture groundTexture = LoadTexture("ground.png");
-	Texture boxTexture = LoadTexture("box.png");
+	Texture groundTexture = LoadTexture("assets/ground.png");
+	Texture boxTexture = LoadTexture("assets/box.png");
 
 	b2Vec2 groundExtent = { 0.5f * groundTexture.width, 0.5f * groundTexture.height };
 	b2Vec2 boxExtent = { 0.5f * boxTexture.width, 0.5f * boxTexture.height };
