@@ -12,6 +12,7 @@ typedef struct Entity
 	b2BodyId bodyId;
 	b2Vec2 extent;
 	Texture texture;
+	float scale;
 } Entity;
 
 static Vector2 ToVector2(b2Vec2 v) { return (Vector2){ v.x, v.y }; }
@@ -26,7 +27,7 @@ void DrawEntity(const Entity* entity)
 	float radians = b2Rot_GetAngle(rotation);
 
 	Vector2 ps = {p.x, p.y};
-	DrawTextureEx(entity->texture, ps, RAD2DEG * radians, 1.0f, WHITE);
+	DrawTextureEx(entity->texture, ps, RAD2DEG * radians, entity->scale, WHITE);
 
 	// I used these circles to ensure the coordinates are correct
 	//DrawCircleV(ps, 5.0f, BLACK);
@@ -41,6 +42,30 @@ void DrawEntity(const Entity* entity)
 #define GROUND_COUNT 14
 #define BOX_COUNT 10
 #define PLAYER_COUNT 1
+// #define float lengthUnitsPerMeter = 128.0f;
+#define LENGTH_UNITS_PER_METER 128.0f;
+
+void AttachWeapon(const Entity* player) {
+
+}
+
+void FollowCursor(const Entity* player) {
+	float lengthUnitsPerMeter = LENGTH_UNITS_PER_METER;
+	Vector2 mousePos = GetMousePosition();
+	b2Vec2 cursorPos = { mousePos.x, mousePos.y };
+	// Entity player = playerEntities[0];
+	b2BodyId playerId = player->bodyId;
+	b2Vec2 playerPos = b2Body_GetPosition(playerId);
+	b2Vec2 cursorPullForce = {
+		cursorPos.x - playerPos.x,
+		cursorPos.y - playerPos.y
+	};
+	float mass = b2Body_GetMass(playerId);
+	float strength = mass * lengthUnitsPerMeter * 5.0f;
+	b2Vec2 dir = b2Normalize(cursorPullForce);
+	b2Vec2 force = { dir.x * strength, dir.y * strength };
+	b2Body_ApplyLinearImpulseToCenter(playerId, force, true);
+}
 
 int main(void)
 {
@@ -50,7 +75,7 @@ int main(void)
 	SetTargetFPS(60);
 
 	// 128 pixels per meter is a appropriate for this scene. The boxes are 128 pixels wide.
-	float lengthUnitsPerMeter = 128.0f;
+	float lengthUnitsPerMeter = LENGTH_UNITS_PER_METER;
 	b2SetLengthUnitsPerMeter(lengthUnitsPerMeter);
 
 	b2WorldDef worldDef = b2DefaultWorldDef();
@@ -65,7 +90,7 @@ int main(void)
 
 	b2Vec2 groundExtent = { 0.5f * groundTexture.width, 0.5f * groundTexture.height };
 	b2Vec2 boxExtent = { 0.5f * boxTexture.width, 0.5f * boxTexture.height };
-	b2Vec2 playerExtent = { 0.5f * playerTexture.width, 0.5f * playerTexture.height };
+	b2Vec2 playerExtent = { 0.25f * playerTexture.width, 0.25f * playerTexture.height };
 
 	// These polygons are centered on the origin and when they are added to a body they
 	// will be centered on the body position.
@@ -86,6 +111,7 @@ int main(void)
 		entity->bodyId = b2CreateBody(worldId, &bodyDef);
 		entity->extent = groundExtent;
 		entity->texture = groundTexture;
+		entity->scale = 1.0f;
 		b2ShapeDef shapeDef = b2DefaultShapeDef();
 		b2CreatePolygonShape(entity->bodyId, &shapeDef, &groundPolygon);
 	}
@@ -108,6 +134,7 @@ int main(void)
 			entity->bodyId = b2CreateBody(worldId, &bodyDef);
 			entity->texture = boxTexture;
 			entity->extent = boxExtent;
+			entity->scale = 1.0f;
 			b2ShapeDef shapeDef = b2DefaultShapeDef();
 			b2CreatePolygonShape(entity->bodyId, &shapeDef, &boxPolygon);
 
@@ -133,6 +160,7 @@ int main(void)
 			entity->bodyId = b2CreateBody(worldId, &bodyDef);
 			entity->texture = playerTexture;
 			entity->extent = playerExtent;
+			entity->scale = 0.5f;
 			b2ShapeDef shapeDef = b2DefaultShapeDef();
 			b2CreatePolygonShape(entity->bodyId, &shapeDef, &playerPolygon);
 
@@ -152,24 +180,8 @@ int main(void)
 		if (pause == false)
 		{
 			float deltaTime = GetFrameTime();
-			Vector2 mousePos = GetMousePosition();
-			b2Vec2 cursorPos = { mousePos.x, mousePos.y };
 			Entity player = playerEntities[0];
-			b2BodyId playerId = player.bodyId;
-			b2Vec2 playerPos = b2Body_GetPosition(playerId);
-			// b2Vec2 cursorPullForce = ToB2Vec2(Vector2Subtract(ToVector2(cursorPos), ToVector2(playerPos)));
-			b2Vec2 cursorPullForce = {
-				cursorPos.x - playerPos.x,
-				cursorPos.y - playerPos.y
-			};
-			float mass = b2Body_GetMass(playerId);
-			float strength = mass * lengthUnitsPerMeter * 5.0f;
-			b2Vec2 dir = b2Normalize(cursorPullForce);
-			b2Vec2 force = { dir.x * strength, dir.y * strength };
-			b2Body_ApplyLinearImpulseToCenter(playerId, force, true);
-			// b2Body_ApplyForceToCenter(player.bodyId, cursorPullForce, true);
-			// b2Body_ApplyLinearImpulseToCenter(playerId, cursorPullForce, true);
-
+			FollowCursor(&player);
 			b2World_Step(worldId, deltaTime, 4);
 		}
 
