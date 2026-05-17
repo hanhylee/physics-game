@@ -1,4 +1,5 @@
 #include "raylib.h"
+#include "raymath.h"
 #include "box2d/box2d.h"
 
 #include <assert.h>
@@ -12,6 +13,9 @@ typedef struct Entity
 	b2Vec2 extent;
 	Texture texture;
 } Entity;
+
+static Vector2 ToVector2(b2Vec2 v) { return (Vector2){ v.x, v.y }; }
+static b2Vec2 ToB2Vec2(Vector2 v) { return (b2Vec2){ v.x, v.y }; }
 
 void DrawEntity(const Entity* entity)
 {
@@ -36,6 +40,7 @@ void DrawEntity(const Entity* entity)
 
 #define GROUND_COUNT 14
 #define BOX_COUNT 10
+#define PLAYER_COUNT 1
 
 int main(void)
 {
@@ -56,14 +61,17 @@ int main(void)
 
 	Texture groundTexture = LoadTexture("assets/ground.png");
 	Texture boxTexture = LoadTexture("assets/box.png");
+	Texture playerTexture = LoadTexture("assets/AmberBall-200.png");
 
 	b2Vec2 groundExtent = { 0.5f * groundTexture.width, 0.5f * groundTexture.height };
 	b2Vec2 boxExtent = { 0.5f * boxTexture.width, 0.5f * boxTexture.height };
+	b2Vec2 playerExtent = { 0.5f * playerTexture.width, 0.5f * playerTexture.height };
 
 	// These polygons are centered on the origin and when they are added to a body they
 	// will be centered on the body position.
 	b2Polygon groundPolygon = b2MakeBox(groundExtent.x, groundExtent.y);
 	b2Polygon boxPolygon = b2MakeBox(boxExtent.x, boxExtent.y);
+	b2Polygon playerPolygon = b2MakeBox(playerExtent.x, playerExtent.y);
 
 	Entity groundEntities[GROUND_COUNT] = { 0 };
 	for (int i = 0; i < GROUND_COUNT; ++i)
@@ -107,6 +115,31 @@ int main(void)
 		}
 	}
 
+	Entity playerEntities[PLAYER_COUNT] = { 0 };
+	int playerIndex = 0;
+	for (int i = 0; i < 1; ++i)
+	{
+		float y = height - groundExtent.y - 100.0f - (2.5f * i + 2.0f) * playerExtent.y - 20.0f;
+
+		for (int j = i; j < 1; ++j)
+		{
+			float x = 0.5f * width + (3.0f * j - i - 3.0f) * playerExtent.x;
+			assert(playerIndex < PLAYER_COUNT);
+
+			Entity* entity = playerEntities + playerIndex;
+			b2BodyDef bodyDef = b2DefaultBodyDef();
+			bodyDef.type = b2_dynamicBody;
+			bodyDef.position = (b2Vec2){ x, y };
+			entity->bodyId = b2CreateBody(worldId, &bodyDef);
+			entity->texture = playerTexture;
+			entity->extent = playerExtent;
+			b2ShapeDef shapeDef = b2DefaultShapeDef();
+			b2CreatePolygonShape(entity->bodyId, &shapeDef, &playerPolygon);
+
+			playerIndex += 1;
+		}
+	}
+
 	bool pause = false;
 
 	while (!WindowShouldClose())
@@ -119,10 +152,25 @@ int main(void)
 		if (pause == false)
 		{
 			float deltaTime = GetFrameTime();
-			b2World_Step(worldId, deltaTime, 4);
-
 			Vector2 mousePos = GetMousePosition();
 			b2Vec2 cursorPos = { mousePos.x, mousePos.y };
+			Entity player = playerEntities[0];
+			b2BodyId playerId = player.bodyId;
+			b2Vec2 playerPos = b2Body_GetPosition(playerId);
+			// b2Vec2 cursorPullForce = ToB2Vec2(Vector2Subtract(ToVector2(cursorPos), ToVector2(playerPos)));
+			b2Vec2 cursorPullForce = {
+				cursorPos.x - playerPos.x,
+				cursorPos.y - playerPos.y
+			};
+			float mass = b2Body_GetMass(playerId);
+			float strength = mass * lengthUnitsPerMeter * 5.0f;
+			b2Vec2 dir = b2Normalize(cursorPullForce);
+			b2Vec2 force = { dir.x * strength, dir.y * strength };
+			b2Body_ApplyLinearImpulseToCenter(playerId, force, true);
+			// b2Body_ApplyForceToCenter(player.bodyId, cursorPullForce, true);
+			// b2Body_ApplyLinearImpulseToCenter(playerId, cursorPullForce, true);
+
+			b2World_Step(worldId, deltaTime, 4);
 		}
 
 		BeginDrawing();
@@ -143,11 +191,17 @@ int main(void)
 			DrawEntity(boxEntities + i);
 		}
 
+		for (int i = 0; i < PLAYER_COUNT; ++i)
+		{
+			DrawEntity(playerEntities + i);
+		}
+
 		EndDrawing();
 	}
 
 	UnloadTexture(groundTexture);
 	UnloadTexture(boxTexture);
+	UnloadTexture(playerTexture);
 
 	CloseWindow();
 
