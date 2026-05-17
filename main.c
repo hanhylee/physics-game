@@ -45,8 +45,35 @@ void DrawEntity(const Entity* entity)
 // #define float lengthUnitsPerMeter = 128.0f;
 #define LENGTH_UNITS_PER_METER 128.0f;
 
-void AttachWeapon(const Entity* player) {
+Entity AttachWeapon(b2WorldId worldId, const Entity* player, Texture texture, b2Vec2 extent, b2Polygon* polygon)
+{
+	Entity weapon = { 0 };
+	weapon.texture = texture;
+	weapon.extent = extent;
+	weapon.scale = 4.0f;
 
+	b2Vec2 playerPos = b2Body_GetPosition(player->bodyId);
+
+	b2BodyDef bodyDef = b2DefaultBodyDef();
+	bodyDef.type = b2_dynamicBody;
+	bodyDef.gravityScale = 3.0f;
+
+	bodyDef.position = (b2Vec2){ playerPos.x + player->extent.x + extent.x, playerPos.y };
+	weapon.bodyId = b2CreateBody(worldId, &bodyDef);
+
+
+	b2ShapeDef shapeDef = b2DefaultShapeDef();
+	b2CreatePolygonShape(weapon.bodyId, &shapeDef, polygon);
+
+	b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
+
+	jointDef.base.bodyIdA = player->bodyId;
+	jointDef.base.bodyIdB = weapon.bodyId;
+	jointDef.base.localFrameA.p = (b2Vec2){ player->extent.x / 2 , player->extent.y / 2 };
+	jointDef.base.localFrameB.p = (b2Vec2){ 0.0f, extent.y * 10 };
+	b2CreateRevoluteJoint(worldId, &jointDef);
+
+	return weapon;
 }
 
 void FollowCursor(const Entity* player) {
@@ -61,7 +88,7 @@ void FollowCursor(const Entity* player) {
 		cursorPos.y - playerPos.y
 	};
 	float mass = b2Body_GetMass(playerId);
-	float strength = mass * lengthUnitsPerMeter * 5.0f;
+	float strength = mass * lengthUnitsPerMeter * 2.0f;
 	b2Vec2 dir = b2Normalize(cursorPullForce);
 	b2Vec2 force = { dir.x * strength, dir.y * strength };
 	b2Body_ApplyLinearImpulseToCenter(playerId, force, true);
@@ -87,16 +114,19 @@ int main(void)
 	Texture groundTexture = LoadTexture("assets/ground.png");
 	Texture boxTexture = LoadTexture("assets/box.png");
 	Texture playerTexture = LoadTexture("assets/AmberBall-200.png");
+	Texture swordTexture = LoadTexture("assets/sword1.png");
 
 	b2Vec2 groundExtent = { 0.5f * groundTexture.width, 0.5f * groundTexture.height };
 	b2Vec2 boxExtent = { 0.5f * boxTexture.width, 0.5f * boxTexture.height };
 	b2Vec2 playerExtent = { 0.25f * playerTexture.width, 0.25f * playerTexture.height };
+	b2Vec2 swordExtent = { 0.5f * swordTexture.width, 0.5f * swordTexture.height };
 
 	// These polygons are centered on the origin and when they are added to a body they
 	// will be centered on the body position.
 	b2Polygon groundPolygon = b2MakeBox(groundExtent.x, groundExtent.y);
 	b2Polygon boxPolygon = b2MakeBox(boxExtent.x, boxExtent.y);
 	b2Polygon playerPolygon = b2MakeBox(playerExtent.x, playerExtent.y);
+	b2Polygon swordPolygon = b2MakeBox(swordExtent.x, swordExtent.y);
 
 	Entity groundEntities[GROUND_COUNT] = { 0 };
 	for (int i = 0; i < GROUND_COUNT; ++i)
@@ -156,6 +186,7 @@ int main(void)
 			Entity* entity = playerEntities + playerIndex;
 			b2BodyDef bodyDef = b2DefaultBodyDef();
 			bodyDef.type = b2_dynamicBody;
+			bodyDef.angularDamping = 10.8f;
 			bodyDef.position = (b2Vec2){ x, y };
 			entity->bodyId = b2CreateBody(worldId, &bodyDef);
 			entity->texture = playerTexture;
@@ -167,6 +198,8 @@ int main(void)
 			playerIndex += 1;
 		}
 	}
+
+	Entity weaponEntity = AttachWeapon(worldId, playerEntities, swordTexture, swordExtent, &swordPolygon);
 
 	bool pause = false;
 
@@ -208,12 +241,15 @@ int main(void)
 			DrawEntity(playerEntities + i);
 		}
 
+		DrawEntity(&weaponEntity);
+
 		EndDrawing();
 	}
 
 	UnloadTexture(groundTexture);
 	UnloadTexture(boxTexture);
 	UnloadTexture(playerTexture);
+	UnloadTexture(swordTexture);
 
 	CloseWindow();
 
