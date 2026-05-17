@@ -120,6 +120,9 @@ int main(void)
 		{
 			float deltaTime = GetFrameTime();
 			b2World_Step(worldId, deltaTime, 4);
+
+			Vector2 mousePos = GetMousePosition();
+			b2Vec2 cursorPos = { mousePos.x, mousePos.y };
 		}
 
 		BeginDrawing();
