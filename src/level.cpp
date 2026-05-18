@@ -17,7 +17,7 @@ Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
     m_enemySharedTexture = LoadTexture("assets/enemy.png");
     int numEnemies = 3;
     for (int i = 0; i < numEnemies; i++) {
-        m_enemies.emplace_back(m_worldId, m_enemySharedTexture, screenWidth, screenHeight);
+        m_enemies.emplace_back(Enemy(m_worldId, m_enemySharedTexture, screenWidth, screenHeight));
     }
 }
 
