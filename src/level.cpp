@@ -42,15 +42,13 @@ void Level::ProcessHits() const {
 
 void Level::Update(float deltaTime) {
     b2Vec2 playerPos = m_player.GetPosition();
-    m_camera.target = (Vector2){ playerPos.x + 20.0f, playerPos.y + 20.0f };
-    // m_camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
-    // m_camera.rotation = 0.0f;
-    // m_camera.zoom = 1.0f;
+    float lerpSpeed = 5.0f;
+    m_camera.target.x += (playerPos.x - m_camera.target.x) * lerpSpeed * deltaTime;
+    m_camera.target.y += (playerPos.y - m_camera.target.y) * lerpSpeed * deltaTime;
     m_player.Update(deltaTime);
-    ProcessHits();
     m_enemy1.Update(deltaTime, playerPos);
+    ProcessHits();
     // m_environment.Update(deltaTime); // Add later if boxes need logic (e.g. conveyor belts)
-
 }
 
 void Level::Draw() const {

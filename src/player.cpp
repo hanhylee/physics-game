@@ -57,17 +57,22 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     bodyDef.gravityScale = 3.0f;
     bodyDef.isBullet = true;
     bodyDef.position = { playerPos.x + playerExtent.x + extent.x, playerPos.y };
+    bodyDef.angularDamping = 2.0f;
 
     weapon.bodyId = b2CreateBody(worldId, &bodyDef);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.enableHitEvents = true;
-    shapeDef.density = 10.0f;
-    shapeDef.material.friction = 0.4f;
+    shapeDef.density = 60.0f;
+    shapeDef.material.friction = 0.9f;
+    shapeDef.material.rollingResistance = 0.8f;
     shapeDef.material.restitution = 0.1f;
     b2CreatePolygonShape(weapon.bodyId, &shapeDef, &polygon);
 
     b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
+    jointDef.dampingRatio = 0.7f;
+    jointDef.enableSpring = false;
+
     jointDef.base.bodyIdA = playerId;
     jointDef.base.bodyIdB = weapon.bodyId;
     jointDef.base.localFrameA.p = { 0.0f , 0.0f };
