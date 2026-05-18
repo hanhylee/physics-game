@@ -1,4 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.22)
+set(CMAKE_CXX_STANDARD 20)
 include(FetchContent)
 
 project(game
@@ -38,7 +39,9 @@ add_executable(game src/main.cpp
 		src/player.cpp
 		src/player.h
 		src/enemy.cpp
-		src/enemy.h)
+		src/enemy.h
+		src/turret.cpp
+		src/turret.h)
 target_link_libraries(game PRIVATE box2d raylib)
 
 add_custom_command(TARGET game POST_BUILD
