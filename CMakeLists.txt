@@ -5,7 +5,7 @@ project(game
 	VERSION 1.0.0
 	DESCRIPTION "Shows how to integrate Box2D with raylib"
 	HOMEPAGE_URL "https://box2d.org"
-	LANGUAGES C
+	LANGUAGES C CXX
 )
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
