@@ -25,6 +25,7 @@ Player::Player(b2WorldId worldId, int screenWidth, int screenHeight)
     
     b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
     b2ShapeDef shapeDef = b2DefaultShapeDef();
+    shapeDef.enableHitEvents = true;
     shapeDef.density = 15.0f;
     b2CreatePolygonShape(bodyId, &shapeDef, &playerPolygon);
 
@@ -59,6 +60,7 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     weapon.bodyId = b2CreateBody(worldId, &bodyDef);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
+    shapeDef.enableHitEvents = true;
     shapeDef.density = 10.0f;
     shapeDef.material.friction = 0.4f;
     shapeDef.material.restitution = 0.1f;
