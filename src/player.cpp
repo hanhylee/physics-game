@@ -55,6 +55,7 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = b2_dynamicBody;
     bodyDef.gravityScale = 3.0f;
+    bodyDef.isBullet = true;
     bodyDef.position = { playerPos.x + playerExtent.x + extent.x, playerPos.y };
 
     weapon.bodyId = b2CreateBody(worldId, &bodyDef);

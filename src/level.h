@@ -17,6 +17,7 @@ private:
     // Order matters: these will be initialized in the order declared here
     Environment m_environment;
     Player m_player;
-    b2WorldId worldId;
+    b2WorldId m_worldId;
     Enemy m_enemy1;
+    Camera2D m_camera;
 };
