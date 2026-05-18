@@ -4,11 +4,15 @@
 
 // Initialize the subsystems in the initializer list
 Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
-    : m_environment(_worldId, screenWidth, screenHeight),
-      m_player(_worldId, screenWidth, screenHeight),
-      m_enemy1(_worldId, screenWidth, screenHeight),
-      worldId(_worldId)
+    : worldId(_worldId),
+      m_environment(worldId, screenWidth, screenHeight),
+      m_player(worldId, screenWidth, screenHeight)
 {
+    m_enemySharedTexture = LoadTexture("assets/enemy.png");
+    int numEnemies = 3;
+    for (int i = 0; i < numEnemies; i++) {
+        m_enemies.emplace_back(worldId, m_enemySharedTexture, screenWidth, screenHeight);
+    }
 }
 
 void Level::ProcessHits() const {
@@ -38,13 +42,19 @@ void Level::Update(float deltaTime) {
     m_player.Update(deltaTime);
     ProcessHits();
     b2Vec2 playerPos = m_player.GetPosition();
-    m_enemy1.Update(deltaTime, playerPos);
+    for (auto& enemy : m_enemies)
+    {
+        enemy.Update(deltaTime, playerPos);
+    }
     // m_environment.Update(deltaTime); // Add later if boxes need logic (e.g. conveyor belts)
-
 }
 
-void Level::Draw() const {
+void Level::Draw() const
+{
     m_environment.Draw();
     m_player.Draw();
-    m_enemy1.Draw();
+    for (const auto& enemy : m_enemies)
+    {
+        enemy.Draw();
+    }
 }

@@ -1,6 +1,6 @@
 #pragma once
-#include "Enemy.h"
 #include "box2d/box2d.h"
+#include "Enemy.h"
 #include "Player.h"
 #include "environment.h"
 
@@ -15,8 +15,9 @@ public:
 
 private:
     // Order matters: these will be initialized in the order declared here
+    b2WorldId worldId;
     Environment m_environment;
     Player m_player;
-    b2WorldId worldId;
-    Enemy m_enemy1;
+    std::vector<Enemy> m_enemies;
+    Texture2D m_enemySharedTexture;
 };

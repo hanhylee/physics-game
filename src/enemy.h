@@ -5,7 +5,7 @@
 class Enemy
 {
 public:
-    Enemy(b2WorldId worldId, int screenWidth, int screenHeight);
+    Enemy(b2WorldId worldId, Texture2D texture, int screenWidth, int screenHeight);
     ~Enemy();
 
     void Update(float deltaTime, b2Vec2 playerPosition);
