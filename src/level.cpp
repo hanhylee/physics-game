@@ -6,7 +6,6 @@
 Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
     : m_environment(_worldId, screenWidth, screenHeight),
       m_player(_worldId, screenWidth, screenHeight),
-      m_enemy1(_worldId, screenWidth, screenHeight),
       m_worldId(_worldId)
 {
     m_camera = { 0 };
@@ -15,6 +14,11 @@ Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
     m_camera.rotation = 0.0f;
     m_camera.zoom = 0.25f;
 
+    m_enemySharedTexture = LoadTexture("assets/enemy.png");
+    int numEnemies = 3;
+    for (int i = 0; i < numEnemies; i++) {
+        m_enemies.emplace_back(m_worldId, m_enemySharedTexture, screenWidth, screenHeight);
+    }
 }
 
 void Level::ProcessHits() const {
@@ -41,20 +45,28 @@ void Level::ProcessHits() const {
 }
 
 void Level::Update(float deltaTime) {
+
     b2Vec2 playerPos = m_player.GetPosition();
     float lerpSpeed = 5.0f;
     m_camera.target.x += (playerPos.x - m_camera.target.x) * lerpSpeed * deltaTime;
     m_camera.target.y += (playerPos.y - m_camera.target.y) * lerpSpeed * deltaTime;
     m_player.Update(deltaTime);
-    m_enemy1.Update(deltaTime, playerPos);
+    for (auto& enemy : m_enemies)
+    {
+        enemy.Update(deltaTime, playerPos);
+    }
     ProcessHits();
     // m_environment.Update(deltaTime); // Add later if boxes need logic (e.g. conveyor belts)
+
 }
 
 void Level::Draw() const {
     BeginMode2D(m_camera);
     m_environment.Draw();
     m_player.Draw();
-    m_enemy1.Draw();
+    for (const auto& enemy : m_enemies)
+    {
+        enemy.Draw();
+    }
     EndMode2D();
 }
