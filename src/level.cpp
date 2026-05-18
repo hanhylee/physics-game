@@ -4,19 +4,25 @@
 
 // Initialize the subsystems in the initializer list
 Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
-    : worldId(_worldId),
-      m_environment(worldId, screenWidth, screenHeight),
-      m_player(worldId, screenWidth, screenHeight)
+    : m_environment(_worldId, screenWidth, screenHeight),
+      m_player(_worldId, screenWidth, screenHeight),
+      m_worldId(_worldId)
 {
+    m_camera = { 0 };
+    m_camera.target = (Vector2){ 0.0f, 0.0f };
+    m_camera.offset = (Vector2){ screenWidth/2.0f, screenHeight/2.0f };
+    m_camera.rotation = 0.0f;
+    m_camera.zoom = 0.25f;
+
     m_enemySharedTexture = LoadTexture("assets/enemy.png");
     int numEnemies = 3;
     for (int i = 0; i < numEnemies; i++) {
-        m_enemies.emplace_back(worldId, m_enemySharedTexture, screenWidth, screenHeight);
+        m_enemies.emplace_back(Enemy(m_worldId, m_enemySharedTexture, screenWidth, screenHeight));
     }
 }
 
 void Level::ProcessHits() const {
-    b2ContactEvents contactEvents = b2World_GetContactEvents(worldId);
+    b2ContactEvents contactEvents = b2World_GetContactEvents(m_worldId);
     for (int i = 0; i < contactEvents.hitCount; ++i) {
         b2ContactHitEvent *hitEvent = contactEvents.hitEvents + i;
         if (hitEvent->approachSpeed > 5.0f) {
@@ -39,22 +45,28 @@ void Level::ProcessHits() const {
 }
 
 void Level::Update(float deltaTime) {
-    m_player.Update(deltaTime);
-    ProcessHits();
+
     b2Vec2 playerPos = m_player.GetPosition();
+    float lerpSpeed = 5.0f;
+    m_camera.target.x += (playerPos.x - m_camera.target.x) * lerpSpeed * deltaTime;
+    m_camera.target.y += (playerPos.y - m_camera.target.y) * lerpSpeed * deltaTime;
+    m_player.Update(deltaTime);
     for (auto& enemy : m_enemies)
     {
         enemy.Update(deltaTime, playerPos);
     }
+    ProcessHits();
     // m_environment.Update(deltaTime); // Add later if boxes need logic (e.g. conveyor belts)
+
 }
 
-void Level::Draw() const
-{
+void Level::Draw() const {
+    BeginMode2D(m_camera);
     m_environment.Draw();
     m_player.Draw();
     for (const auto& enemy : m_enemies)
     {
         enemy.Draw();
     }
+    EndMode2D();
 }

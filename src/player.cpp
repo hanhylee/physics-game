@@ -20,7 +20,7 @@ Player::Player(b2WorldId worldId, int screenWidth, int screenHeight)
 
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = b2_dynamicBody;
-    bodyDef.angularDamping = 20.0f;
+    bodyDef.angularDamping = 10.0f;
     bodyDef.position = { spawnX, spawnY };
     
     b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
@@ -55,18 +55,26 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = b2_dynamicBody;
     bodyDef.gravityScale = 3.0f;
+    bodyDef.isBullet = true;
     bodyDef.position = { playerPos.x + playerExtent.x + extent.x, playerPos.y };
+    bodyDef.angularDamping = 20.0f;
 
     weapon.bodyId = b2CreateBody(worldId, &bodyDef);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.enableHitEvents = true;
-    shapeDef.density = 10.0f;
-    shapeDef.material.friction = 0.4f;
+    shapeDef.density = 60.0f;
+    shapeDef.material.friction = 0.9f;
+    shapeDef.material.rollingResistance = 0.8f;
     shapeDef.material.restitution = 0.1f;
     b2CreatePolygonShape(weapon.bodyId, &shapeDef, &polygon);
 
     b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
+    // Adding a motor with 0 speed to act as a brake to limit rotational forces
+    jointDef.enableMotor = true;
+    jointDef.motorSpeed = 0.0f;
+    jointDef.maxMotorTorque = 4000.0f;
+
     jointDef.base.bodyIdA = playerId;
     jointDef.base.bodyIdB = weapon.bodyId;
     jointDef.base.localFrameA.p = { 0.0f , 0.0f };

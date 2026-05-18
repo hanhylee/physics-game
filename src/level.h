@@ -15,9 +15,10 @@ public:
 
 private:
     // Order matters: these will be initialized in the order declared here
-    b2WorldId worldId;
     Environment m_environment;
     Player m_player;
+    b2WorldId m_worldId;
+    Camera2D m_camera;
     std::vector<Enemy> m_enemies;
     Texture2D m_enemySharedTexture;
 };

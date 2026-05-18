@@ -14,6 +14,6 @@ private:
     std::vector<Entity> m_groundEntities;
     std::vector<Entity> m_boxEntities;
 
-    Texture2D m_groundTexture;
-    Texture2D m_boxTexture;
+    Texture2D m_groundTexture{};
+    Texture2D m_boxTexture{};
 };
