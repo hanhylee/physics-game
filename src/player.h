@@ -10,6 +10,7 @@ public:
 
     void Update(float deltaTime);
     void Draw() const;
+    b2Vec2 GetPosition() const;
 
 private:
     Entity AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D texture, b2Vec2 extent, b2Polygon polygon);
