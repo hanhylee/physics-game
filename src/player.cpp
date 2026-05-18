@@ -20,7 +20,7 @@ Player::Player(b2WorldId worldId, int screenWidth, int screenHeight)
 
     b2BodyDef bodyDef = b2DefaultBodyDef();
     bodyDef.type = b2_dynamicBody;
-    bodyDef.angularDamping = 10.8f;
+    bodyDef.angularDamping = 20.0f;
     bodyDef.position = { spawnX, spawnY };
     
     b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
@@ -63,8 +63,8 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
     jointDef.base.bodyIdA = playerId;
     jointDef.base.bodyIdB = weapon.bodyId;
-    jointDef.base.localFrameA.p = { playerExtent.x / 2 , playerExtent.y / 2 };
-    jointDef.base.localFrameB.p = { 0.0f, extent.y * 10 };
+    jointDef.base.localFrameA.p = { 0.0f , 0.0f };
+    jointDef.base.localFrameB.p = {extent.x / 1.0f, extent.y * 7.5f};
     b2CreateRevoluteJoint(worldId, &jointDef);
 
     return weapon;
@@ -74,19 +74,18 @@ void Player::FollowCursor()
 {
     if (m_playerEntities.empty()) return;
 
-    Vector2 mousePos = GetMousePosition();
-    b2Vec2 cursorPos = { mousePos.x, mousePos.y };
-    
+    Vector2 mouseDelta = GetMouseDelta();
     b2BodyId playerId = m_playerEntities[0].bodyId;
-    b2Vec2 playerPos = b2Body_GetPosition(playerId);
-    
-    b2Vec2 cursorPullForce = { cursorPos.x - playerPos.x, cursorPos.y - playerPos.y };
+    b2Vec2 cursorPullForce = {
+        mouseDelta.x,
+        mouseDelta.y
+    };
     
     float mass = b2Body_GetMass(playerId);
-    float strength = mass * LENGTH_UNITS_PER_METER * 2.0f;
+    float strength = mass * LENGTH_UNITS_PER_METER * 1.1f;
     b2Vec2 dir = b2Normalize(cursorPullForce);
     b2Vec2 force = { dir.x * strength, dir.y * strength };
-    
+
     b2Body_ApplyLinearImpulseToCenter(playerId, force, true);
 }
 

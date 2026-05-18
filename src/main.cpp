@@ -8,6 +8,7 @@ int main()
 	InitWindow(width, height, "Box2D-Raylib C++");
 	SetWindowPosition(50, 50);
 	SetTargetFPS(60);
+	DisableCursor();
 
 	b2SetLengthUnitsPerMeter(LENGTH_UNITS_PER_METER);
 
