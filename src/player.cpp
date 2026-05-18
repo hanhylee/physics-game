@@ -27,6 +27,8 @@ Player::Player(b2WorldId worldId, int screenWidth, int screenHeight)
     b2ShapeDef shapeDef = b2DefaultShapeDef();
     shapeDef.enableHitEvents = true;
     shapeDef.density = 15.0f;
+    shapeDef.filter.categoryBits = CAT_PLAYER;
+    shapeDef.filter.maskBits = CAT_ENEMY | CAT_PROJECTILE | CAT_WALL;
     b2CreatePolygonShape(bodyId, &shapeDef, &playerPolygon);
 
     m_playerEntities.push_back({ bodyId, playerExtent, m_playerTexture, 0.5f });
@@ -67,6 +69,8 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     shapeDef.material.friction = 0.9f;
     shapeDef.material.rollingResistance = 0.8f;
     shapeDef.material.restitution = 0.1f;
+    shapeDef.filter.categoryBits = CAT_WEAPON;
+    shapeDef.filter.maskBits = CAT_ENEMY | CAT_PROJECTILE;
     b2CreatePolygonShape(weapon.bodyId, &shapeDef, &polygon);
 
     b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();

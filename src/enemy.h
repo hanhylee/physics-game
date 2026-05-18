@@ -6,10 +6,12 @@ class Enemy
 {
 public:
     Enemy(b2WorldId worldId, Texture2D texture, int screenWidth, int screenHeight);
+    Enemy(b2WorldId worldId, Texture2D texture, b2Vec2 spawnPosition);
     ~Enemy();
 
     void Update(float deltaTime, b2Vec2 playerPosition);
     void Draw() const;
+    [[nodiscard]] b2BodyId GetBodyId() const;
 
 private:
     void FollowPlayer(float deltaTime, b2Vec2 playerPosition);

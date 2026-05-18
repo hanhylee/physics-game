@@ -6,7 +6,7 @@ int main()
 {
 	int width = 1920, height = 1080;
 	InitWindow(width, height, "Box2D-Raylib C++");
-	// SetWindowPosition(50, 50);
+	SetWindowPosition(50, 50);
 	SetTargetFPS(60);
 	DisableCursor();
 
