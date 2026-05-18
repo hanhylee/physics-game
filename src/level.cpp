@@ -6,9 +6,9 @@
 Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
     : m_environment(_worldId, screenWidth, screenHeight),
       m_player(_worldId, screenWidth, screenHeight),
-      m_enemy1(_worldId, screenWidth, screenHeight)
+      m_enemy1(_worldId, screenWidth, screenHeight),
+      worldId(_worldId)
 {
-    worldId = _worldId;
 }
 
 void Level::ProcessHits() const {
