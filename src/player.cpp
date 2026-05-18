@@ -100,3 +100,10 @@ void Player::Draw() const
     for (const auto& player : m_playerEntities) player.Draw();
     m_weaponEntity.Draw();
 }
+
+b2Vec2 Player::GetPosition() const {
+    if (m_playerEntities.empty()) return { 0.0f, 0.0f };
+
+    // Box2D v3 function to get the current world position
+    return b2Body_GetPosition(m_playerEntities[0].bodyId);
+}

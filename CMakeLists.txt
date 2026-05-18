@@ -36,7 +36,9 @@ add_executable(game src/main.cpp
 		src/environment.cpp
 		src/environment.h
 		src/player.cpp
-		src/player.h)
+		src/player.h
+		src/enemy.cpp
+		src/enemy.h)
 target_link_libraries(game PRIVATE box2d raylib)
 
 add_custom_command(TARGET game POST_BUILD
