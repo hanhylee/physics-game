@@ -25,6 +25,7 @@ Player::Player(b2WorldId worldId, int screenWidth, int screenHeight)
     
     b2BodyId bodyId = b2CreateBody(worldId, &bodyDef);
     b2ShapeDef shapeDef = b2DefaultShapeDef();
+    shapeDef.density = 15.0f;
     b2CreatePolygonShape(bodyId, &shapeDef, &playerPolygon);
 
     m_playerEntities.push_back({ bodyId, playerExtent, m_playerTexture, 0.5f });
@@ -40,7 +41,7 @@ Player::~Player()
     UnloadTexture(m_swordTexture);
 }
 
-Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D texture, b2Vec2 extent, b2Polygon polygon) 
+Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D texture, b2Vec2 extent, b2Polygon polygon)
 {
     Entity weapon = {};
     weapon.texture = texture;
@@ -54,10 +55,13 @@ Entity Player::AttachWeapon(b2WorldId worldId, b2BodyId playerId, Texture2D text
     bodyDef.type = b2_dynamicBody;
     bodyDef.gravityScale = 3.0f;
     bodyDef.position = { playerPos.x + playerExtent.x + extent.x, playerPos.y };
-    
+
     weapon.bodyId = b2CreateBody(worldId, &bodyDef);
 
     b2ShapeDef shapeDef = b2DefaultShapeDef();
+    shapeDef.density = 10.0f;
+    shapeDef.material.friction = 0.4f;
+    shapeDef.material.restitution = 0.1f;
     b2CreatePolygonShape(weapon.bodyId, &shapeDef, &polygon);
 
     b2RevoluteJointDef jointDef = b2DefaultRevoluteJointDef();
@@ -80,7 +84,7 @@ void Player::FollowCursor()
         mouseDelta.x,
         mouseDelta.y
     };
-    
+
     float mass = b2Body_GetMass(playerId);
     float strength = mass * LENGTH_UNITS_PER_METER * 1.1f;
     b2Vec2 dir = b2Normalize(cursorPullForce);
