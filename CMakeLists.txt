@@ -28,7 +28,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(raylib)
 
-add_executable(game main.c)
+add_executable(game src/main.cpp
+		src/level.cpp
+		src/level.h
+		src/entity.cpp
+		src/entity.h
+		src/environment.cpp
+		src/environment.h
+		src/player.cpp
+		src/player.h)
 target_link_libraries(game PRIVATE box2d raylib)
 
 add_custom_command(TARGET game POST_BUILD
@@ -43,7 +51,7 @@ if (MSVC)
 endif()
 
 if (EMSCRIPTEN)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")    
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Os")
 	# Since WASM is used, ALLOW_MEMORY_GROWTH has no extra overheads
 	#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -sWASM=1 -sASYNCIFY -sALLOW_MEMORY_GROWTH=1 --shell-file ${CMAKE_SOURCE_DIR}/minshell.html")
 	set(CMAKE_EXECUTABLE_SUFFIX ".html")
