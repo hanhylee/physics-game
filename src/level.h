@@ -13,8 +13,8 @@ public:
     void Draw() const;
 
 private:
-    // Order matters: these will be initialized in the order declared here
     Environment m_environment;
     Player m_player;
-    Enemy m_enemy1;
+    std::vector<Enemy> m_enemies;
+    Texture2D m_enemySharedTexture;
 };
