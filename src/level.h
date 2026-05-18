@@ -1,6 +1,5 @@
 #pragma once
 #include "box2d/box2d.h"
-#include "Enemy.h"
 #include "Player.h"
 #include "environment.h"
 
@@ -16,5 +15,5 @@ private:
     // Order matters: these will be initialized in the order declared here
     Environment m_environment;
     Player m_player;
-    Enemy m_enemy1;
+    b2WorldId worldId;
 };
