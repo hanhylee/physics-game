@@ -16,6 +16,7 @@ public:
     void ProcessHits() const;
     void Update(float deltaTime);
     void Draw() const;
+    int GetEnemyCount() const { return (int)m_enemies.size(); }
 
 private:
     // Order matters: these will be initialized in the order declared here

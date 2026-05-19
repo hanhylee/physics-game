@@ -1,6 +1,9 @@
 #include "Level.h"
 #include "box2d/box2d.h"
 #include <vector>
+#include <execution>
+
+#define NUM_TURRETS 200
 
 // Initialize the subsystems in the initializer list
 Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
@@ -18,8 +21,7 @@ Level::Level(b2WorldId _worldId, int screenWidth, int screenHeight)
     m_enemyTexture = LoadTexture("assets/enemy.png");
     m_turretTexture = LoadTexture("assets/turret.png");
 
-    int numTurrets = 10;
-    for (int i = 0; i < numTurrets; i++) {
+    for (int i = 0; i < NUM_TURRETS; i++) {
         float randomX = (float)GetRandomValue(-2000, 2000);
         float randomY = (float)GetRandomValue(-2000, 2000);
         b2Vec2 randomPos = { randomX, randomY };
@@ -39,7 +41,7 @@ void Level::Update(float deltaTime) {
     ClearDestroyedBodies();
     UpdateEnemies(deltaTime, m_player.GetPosition());
     UpdateCamera(deltaTime, m_player.GetPosition());
-    // m_environment.Update(deltaTime); // Add later if boxes need logic (e.g. conveyor belts)
+    // TODO: m_environment.Update(deltaTime); // Add later if boxes need logic (e.g. conveyor belts)
 }
 
 void Level::ProcessHits() const {
@@ -145,10 +147,11 @@ void Level::UpdateEnemies(float deltaTime, b2Vec2 playerPos) {
     }
     m_enemiesToSpawn.clear(); // Reset for next frame
 
-    // 3. Update all existing enemies
-    for (auto& enemy : m_enemies) {
-        enemy->Update(deltaTime, playerPos);
-    }
+    // 3. Update all existing enemies CONCURRENTLY
+    std::for_each(std::execution::par, m_enemies.begin(), m_enemies.end(),
+        [deltaTime, playerPos](const std::unique_ptr<Enemy>& enemy) {
+            enemy->Update(deltaTime, playerPos);
+        });
 }
 
 void Level::Draw() const {
